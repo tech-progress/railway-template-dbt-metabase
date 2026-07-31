@@ -1,0 +1,90 @@
+services:
+  metabase-postgres:
+    image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: metabase
+      POSTGRES_USER: metabase
+      POSTGRES_PASSWORD: ${METABASE_POSTGRES_PASSWORD:?Set METABASE_POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metabase -d metabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - metabase-data:/var/lib/postgresql/data
+
+  warehouse-postgres:
+    image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_DB: warehouse
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: ${WAREHOUSE_POSTGRES_PASSWORD:?Set WAREHOUSE_POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U analytics -d warehouse"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - warehouse-data:/var/lib/postgresql/data
+
+  metabase:
+    image: metabase/metabase:v0.63.2@sha256:252f8c9bd56dd21158005675b55876cf9fb838e0a0e0541581af859eafe1f32e
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_HOST: metabase-postgres
+      MB_DB_PORT: "5432"
+      MB_DB_DBNAME: metabase
+      MB_DB_USER: metabase
+      MB_DB_PASS: ${METABASE_POSTGRES_PASSWORD:?Set METABASE_POSTGRES_PASSWORD}
+      MB_ENCRYPTION_SECRET_KEY: ${MB_ENCRYPTION_SECRET_KEY:?Set MB_ENCRYPTION_SECRET_KEY}
+      MB_ANON_TRACKING_ENABLED: "false"
+      MB_LOAD_SAMPLE_CONTENT: "false"
+      MB_JETTY_PORT: "3000"
+      JAVA_OPTS: -Xms128m -Xmx384m
+    depends_on:
+      metabase-postgres:
+        condition: service_healthy
+    ports:
+      - "18081:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "exec 3<>/dev/tcp/127.0.0.1/3000; printf 'GET /api/health HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3; grep -q '200 OK' <&3",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 60s
+
+  dbt:
+    build: .
+    environment:
+      PORT: "8080"
+      WAREHOUSE_HOST: warehouse-postgres
+      WAREHOUSE_PORT: "5432"
+      WAREHOUSE_DATABASE: warehouse
+      WAREHOUSE_USER: analytics
+      WAREHOUSE_PASSWORD: ${WAREHOUSE_POSTGRES_PASSWORD:?Set WAREHOUSE_POSTGRES_PASSWORD}
+      METABASE_URL: http://metabase:3000
+      METABASE_ADMIN_EMAIL: ${METABASE_ADMIN_EMAIL:-admin@example.com}
+      METABASE_ADMIN_PASSWORD: ${METABASE_ADMIN_PASSWORD:?Set METABASE_ADMIN_PASSWORD}
+      DBT_RUN_INTERVAL_SECONDS: ${DBT_RUN_INTERVAL_SECONDS:-86400}
+    depends_on:
+      warehouse-postgres:
+        condition: service_healthy
+      metabase:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  metabase-data:
+  warehouse-data:

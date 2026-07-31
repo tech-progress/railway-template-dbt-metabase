@@ -1,0 +1,5 @@
+.env
+logs/
+target/
+dbt_packages/
+node_modules/

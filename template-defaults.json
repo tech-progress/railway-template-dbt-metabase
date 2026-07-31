@@ -1,0 +1,42 @@
+{
+  "Metabase PostgreSQL": {
+    "PGDATA": "/var/lib/postgresql/data/pgdata",
+    "POSTGRES_DB": "metabase",
+    "POSTGRES_USER": "metabase",
+    "POSTGRES_PASSWORD": "${{secret(48)}}"
+  },
+  "Warehouse PostgreSQL": {
+    "PGDATA": "/var/lib/postgresql/data/pgdata",
+    "POSTGRES_DB": "warehouse",
+    "POSTGRES_USER": "analytics",
+    "POSTGRES_PASSWORD": "${{secret(48)}}"
+  },
+  "Metabase": {
+    "PORT": "3000",
+    "MB_JETTY_PORT": "3000",
+    "MB_DB_TYPE": "postgres",
+    "MB_DB_HOST": "${{Metabase PostgreSQL.RAILWAY_PRIVATE_DOMAIN}}",
+    "MB_DB_PORT": "5432",
+    "MB_DB_DBNAME": "${{Metabase PostgreSQL.POSTGRES_DB}}",
+    "MB_DB_USER": "${{Metabase PostgreSQL.POSTGRES_USER}}",
+    "MB_DB_PASS": "${{Metabase PostgreSQL.POSTGRES_PASSWORD}}",
+    "MB_ENCRYPTION_SECRET_KEY": "${{secret(48)}}",
+    "MB_ANON_TRACKING_ENABLED": "false",
+    "MB_LOAD_SAMPLE_CONTENT": "false",
+    "JAVA_OPTS": "-Xms128m -Xmx384m",
+    "METABASE_ADMIN_EMAIL": "admin@example.com",
+    "METABASE_ADMIN_PASSWORD": "${{secret(32)}}"
+  },
+  "dbt": {
+    "PORT": "8080",
+    "WAREHOUSE_HOST": "${{Warehouse PostgreSQL.RAILWAY_PRIVATE_DOMAIN}}",
+    "WAREHOUSE_PORT": "5432",
+    "WAREHOUSE_DATABASE": "${{Warehouse PostgreSQL.POSTGRES_DB}}",
+    "WAREHOUSE_USER": "${{Warehouse PostgreSQL.POSTGRES_USER}}",
+    "WAREHOUSE_PASSWORD": "${{Warehouse PostgreSQL.POSTGRES_PASSWORD}}",
+    "METABASE_URL": "http://${{Metabase.RAILWAY_PRIVATE_DOMAIN}}:3000",
+    "METABASE_ADMIN_EMAIL": "${{Metabase.METABASE_ADMIN_EMAIL}}",
+    "METABASE_ADMIN_PASSWORD": "${{Metabase.METABASE_ADMIN_PASSWORD}}",
+    "DBT_RUN_INTERVAL_SECONDS": "86400"
+  }
+}

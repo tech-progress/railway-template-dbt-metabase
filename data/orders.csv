@@ -1,0 +1,4 @@
+order_id,ordered_at,customer_name,status,amount
+1001,2026-07-01T10:00:00Z,Ada Lovelace,complete,149.00
+1002,2026-07-02T11:30:00Z,Grace Hopper,complete,249.50
+1003,2026-07-03T14:15:00Z,Evelyn Boyd Granville,processing,89.99

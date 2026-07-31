@@ -1,0 +1,11 @@
+{
+  "Metabase": {
+    "METABASE_ADMIN_EMAIL": "Email for the administrator created on first boot.",
+    "METABASE_ADMIN_PASSWORD": "Generated first-boot administrator password; changing it later does not rotate the account.",
+    "MB_ENCRYPTION_SECRET_KEY": "Generated key used to encrypt warehouse credentials in Metabase.",
+    "JAVA_OPTS": "Bounded Java heap sized for this small-team baseline."
+  },
+  "dbt": {
+    "DBT_RUN_INTERVAL_SECONDS": "Seconds between successful dbt seed and build runs."
+  }
+}

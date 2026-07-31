@@ -1,0 +1,4 @@
+{
+  "Metabase PostgreSQL": {"mountPath":"/var/lib/postgresql/data","sizeMB":5000},
+  "Warehouse PostgreSQL": {"mountPath":"/var/lib/postgresql/data","sizeMB":5000}
+}

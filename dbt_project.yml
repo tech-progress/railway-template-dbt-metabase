@@ -1,0 +1,12 @@
+name: railway_analytics
+version: "1.0.0"
+config-version: 2
+profile: railway_analytics
+model-paths: ["models"]
+seed-paths: ["data"]
+models:
+  railway_analytics:
+    +materialized: table
+seeds:
+  railway_analytics:
+    +schema: raw
