@@ -65,4 +65,14 @@ request="$(jq -nc --argjson variables "${variables}" --arg query '
 response="$(curl --compressed --fail --silent --show-error https://backboard.railway.com/graphql/internal \
   --header "Authorization: Bearer ${railway_access_token}" --header "Content-Type: application/json" --data-binary "${request}")"
 jq -e '.data.templateUpsertConfig.id != null and ((.errors // []) | length == 0)' <<<"${response}" >/dev/null
+
+settings_request="$(jq -nc \
+  --arg id "${template_id}" --arg workspaceId "${workspace_id}" --arg query '
+    mutation RenameDraft($id: String!, $input: TemplateUpsertSettingsInput!) {
+      templateUpsertSettings(id: $id, input: $input) { id name }
+    }' \
+  '{query:$query,variables:{id:$id,input:{name:"dbt + Metabase analytics",workspaceId:$workspaceId}}}')"
+settings_response="$(curl --compressed --fail --silent --show-error https://backboard.railway.com/graphql/internal \
+  --header "Authorization: Bearer ${railway_access_token}" --header "Content-Type: application/json" --data-binary "${settings_request}")"
+jq -e '.data.templateUpsertSettings.name == "dbt + Metabase analytics" and ((.errors // []) | length == 0)' <<<"${settings_response}" >/dev/null
 echo "Restored dbt + Metabase template ${template_id} sources, commands, variables, volumes, and networking."

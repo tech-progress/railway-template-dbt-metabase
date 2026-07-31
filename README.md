@@ -15,7 +15,7 @@ The dbt pipeline reruns every 86,400 seconds. Change `DBT_RUN_INTERVAL_SECONDS` 
 - Warehouse PostgreSQL is private and holds source seeds plus transformed analytics tables.
 - Both PostgreSQL services have separate 5 GB volumes, so back up both before upgrades.
 
-Metabase's Java heap is bounded at 384 MB and bundled sample content is disabled. The final local cold-boot snapshot used about 904 MiB for Metabase, 18 MiB for dbt, 86 MiB for the metadata database, and 33 MiB for the warehouse. Use at least 1 GiB for Metabase and move to 2 GiB before adding substantial dashboards, concurrency, or additional drivers.
+Metabase's Java heap is bounded at 384 MB and bundled sample content is disabled. The final local cold-boot snapshot used about 904 MiB for Metabase, 18 MiB for dbt, 86 MiB for the metadata database, and 33 MiB for the warehouse. Provision at least 2 GiB for Metabase so cold starts and routine queries have operating headroom; raise the heap and service memory together before adding substantial dashboards, concurrency, or additional drivers.
 
 ## Local verification
 
