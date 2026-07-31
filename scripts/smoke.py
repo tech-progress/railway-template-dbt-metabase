@@ -55,13 +55,39 @@ def main() -> None:
         raise RuntimeError("Analytics warehouse connection is missing")
 
     status, cards = call(args.url, "GET", "/api/card", session=session)
-    if status != 200 or not any(card["name"] == "Orders by status" for card in cards):
+    card = (
+        next((item for item in cards if item["name"] == "Orders by status"), None)
+        if status == 200
+        else None
+    )
+    if card is None:
         raise RuntimeError("Orders by status question is missing")
     status, dashboards = call(args.url, "GET", "/api/dashboard", session=session)
-    if status != 200 or not any(
-        dashboard["name"] == "Railway order overview" for dashboard in dashboards
-    ):
+    dashboard = (
+        next(
+            (
+                item
+                for item in dashboards
+                if item["name"] == "Railway order overview"
+            ),
+            None,
+        )
+        if status == 200
+        else None
+    )
+    if dashboard is None:
         raise RuntimeError("Railway order overview dashboard is missing")
+    status, dashboard_detail = call(
+        args.url,
+        "GET",
+        f"/api/dashboard/{dashboard['id']}",
+        session=session,
+    )
+    if status != 200 or not any(
+        dashcard.get("card_id") == card["id"]
+        for dashcard in dashboard_detail.get("dashcards", [])
+    ):
+        raise RuntimeError("Orders by status question is not attached to the dashboard")
 
     status, result = call(
         args.url,

@@ -8,6 +8,13 @@ Set `METABASE_ADMIN_EMAIL` if the default is unsuitable. Railway generates the a
 
 The dbt pipeline reruns every 86,400 seconds. Change `DBT_RUN_INTERVAL_SECONDS` on the dbt service for another cadence, then replace the example seed and model in the source repository with your own project. A failed dbt build leaves the previous warehouse table intact and keeps the service unhealthy on its first boot.
 
+## Environment variables
+
+- `METABASE_POSTGRES_PASSWORD` authenticates Metabase to its metadata database, while `WAREHOUSE_POSTGRES_PASSWORD` authenticates dbt and Metabase to the analytics warehouse. Railway generates both; local Compose requires strong values in `.env`.
+- `METABASE_ADMIN_PASSWORD` creates the first Metabase administrator and must pass Metabase's common-password check. Railway generates it; changing the variable after setup does not rotate the existing account password.
+- `MB_ENCRYPTION_SECRET_KEY` encrypts database credentials stored by Metabase. Railway generates it; keep the same value for the life of an initialized metadata database.
+- `METABASE_ADMIN_EMAIL` defaults to `admin@example.com`, and `DBT_RUN_INTERVAL_SECONDS` defaults to `86400`; set them before first boot when you need another administrator identity or schedule.
+
 ## Services and persistence
 
 - Metabase is public on port 3000 and stores its users, questions, and dashboards in a private PostgreSQL service.
