@@ -2,6 +2,8 @@
 
 The current template release is `v1.0.0`. It deploys dbt Core `1.12.0`, dbt-postgres `1.11.0`, Metabase `0.63.2`, and two PostgreSQL 17 services. Runtime base images are pinned by digest.
 
+Upstream projects: [dbt](https://www.getdbt.com) and [Metabase](https://www.metabase.com).
+
 ## Deploy on Railway
 
 Set `METABASE_ADMIN_EMAIL` if the default is unsuitable. Railway generates the administrator password, both database passwords, and Metabase's credential-encryption key. The dbt service seeds three example orders, builds and tests `analytics.order_summary`, connects Metabase to the warehouse, and creates the `Orders by status` question and `Railway order overview` dashboard. Open the Metabase domain and sign in with the administrator values stored on that service.
