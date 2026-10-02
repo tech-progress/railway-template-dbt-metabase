@@ -1,6 +1,6 @@
 # dbt + Metabase Railway template
 
-The current template release is `v1.0.0`. It deploys dbt Core `1.12.0`, dbt-postgres `1.11.0`, Metabase `0.63.2`, and two PostgreSQL 17 services. Runtime base images are pinned by digest.
+The current template release is `v1.0.1`. It deploys dbt Core `1.12.5`, dbt-postgres `1.11.0`, Metabase `0.63.19`, and two PostgreSQL `17.11` services. Runtime base images are pinned by digest.
 
 Upstream projects: [dbt](https://www.getdbt.com) and [Metabase](https://www.metabase.com).
 

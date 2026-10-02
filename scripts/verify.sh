@@ -6,7 +6,8 @@ required=(.dockerignore .env.example .gitignore .railway/railway.ts CHANGELOG.md
 for file in "${required[@]}"; do test -f "${template_root}/${file}" || { echo "Missing ${file}" >&2; exit 1; }; done
 
 version="$(<"${template_root}/VERSION")"; [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-grep -Fq "## [${version}] - 2026-07-31" "${template_root}/CHANGELOG.md"
+escaped_version="${version//./\\.}"
+grep -Eq "^## \\[${escaped_version}\\] - [0-9]{4}-[0-9]{2}-[0-9]{2}$" "${template_root}/CHANGELOG.md"
 for file in README.md PUBLISHING.md; do grep -Fq "current template release is \`v${version}\`" "${template_root}/${file}"; done
 publish_description="$(grep -E '^  --description "' "${template_root}/PUBLISHING.md" | cut -d '"' -f 2)"
 [[ -n "${publish_description}" && ${#publish_description} -le 75 ]]
@@ -27,8 +28,13 @@ jq -e '
   ([.[] | select(.name=="Metabase")][0].deploy.healthcheckPath == "/api/health")
 ' <<<"${graph}" >/dev/null
 
-pins=(519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7 252f8c9bd56dd21158005675b55876cf9fb838e0a0e0541581af859eafe1f32e ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94)
-for pin in "${pins[@]}"; do grep -Rqs "${pin}" "${template_root}/Dockerfile" "${template_root}/compose.yaml" "${template_root}/.railway/railway.ts"; done
+grep -Fxq 'dbt-core==1.12.5' "${template_root}/requirements.txt"
+grep -Fxq 'dbt-postgres==1.11.0' "${template_root}/requirements.txt"
+grep -Fq 'python:3.12.15-slim-bookworm@sha256:54c85f3c47607a77f32adec749d3c81d1348bf25833671f512b26a9b6d778cb3' "${template_root}/Dockerfile"
+for file in compose.yaml .railway/railway.ts; do
+  grep -Fq 'metabase/metabase:v0.63.19@sha256:7324f83713df9851c6c7b6c8247098de14c0924fc3b868202f886df4877cd4ff' "${template_root}/${file}"
+  grep -Fq 'postgres:17.11-alpine@sha256:b0f9560a2de083e2cc7382e75f808c7381a32852a7ec49117deedb300e552b24' "${template_root}/${file}"
+done
 jq -e '.Metabase.METABASE_ADMIN_PASSWORD=="${{secret(32)}}" and .Metabase.MB_ENCRYPTION_SECRET_KEY=="${{secret(48)}}" and .Metabase.MB_LOAD_SAMPLE_CONTENT=="false" and .dbt.METABASE_ADMIN_PASSWORD=="${{Metabase.METABASE_ADMIN_PASSWORD}}"' "${template_root}/template-defaults.json" >/dev/null
 if find "${template_root}" -type f \( -name .env -o -name '*.local' \) -print -quit | grep -q .; then echo "Local secret file found." >&2; exit 1; fi
 echo "dbt + Metabase structure, pins, variables, volumes, and networking are valid."
